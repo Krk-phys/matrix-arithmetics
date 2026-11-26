@@ -1,13 +1,15 @@
 class Matrix:
 
 
-    def __init__(self, m: list[list] | list | int, n=None, EPS=1e-5):
-        if type(n) is None and type(m) is not list:
+    def __init__(self, m: list[list] | list | int, n=None, EPS=1e-6):
+        if n is None and type(m) is not list:
             raise TypeError(f"can't create a matrix from {type(m)}")
-        if type(n) is (not None and not int):
+        if n is not None and type(n) is not int:
             raise TypeError(f"number of columns must be int, not {type(n)}") 
         if type(n) is int and type(m) is not int:
             raise TypeError(f"number of rows must be int, not {type(m)}")
+        if m == []:
+            raise ValueError(f"can't create a matrix from empty list")
         
         # zero-matrix from dimensions
         if n is not None:
@@ -62,7 +64,7 @@ class Matrix:
 
 
     def __mul__(self, other: Matrix | int | float) -> Matrix:
-        if type(other) is not (Matrix or int or float):
+        if not(type(other) is Matrix or type(other) is float or type(other) is int):
             raise TypeError(f"can only multiply matrix by matrix, "
                             f"int or float, not {type(other)}")
 
@@ -86,7 +88,7 @@ class Matrix:
         return out
 
     def __truediv__(self, other: int | float) -> Matrix:
-        if type(other) is not (int or float):
+        if not(type(other) is float or type(other) is int):
             raise TypeError("can only divide matrix by int or float, "
                             f"not {type(other)}")
 
