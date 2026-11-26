@@ -40,6 +40,8 @@ class Matrix:
 
 
     def __add__(self, other: Matrix) -> Matrix:
+        if type(other) is not Matrix:
+            raise TypeError(f"can't add {type(self)} and {type(other)}")
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError(f"matricies must have same dimentions, " + 
                              f"but have sizes {self.get_size()} and {other.get_size()}")
@@ -52,6 +54,8 @@ class Matrix:
 
 
     def __sub__(self, other) -> Matrix:
+        if type(other) is not Matrix:
+            raise TypeError(f"can't add {type(self)} and {type(other)}")
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError(f"matricies must have same dimentions, "
                              f"but have sizes {self.get_size()} and {other.get_size()}")
