@@ -1,7 +1,11 @@
+from math import isclose
+from __future__ import annotations
+
+
 class Matrix:
 
 
-    def __init__(self, m: list[list] | list | int, n=None, EPS=1e-6):
+    def __init__(self, m: list[list] | list | int, n=None, abs_tol=1e-9):
         if n is None and type(m) is not list:
             raise TypeError(f"can't create a matrix from {type(m)}")
         if n is not None and type(n) is not int:
@@ -23,6 +27,9 @@ class Matrix:
         elif type(m[0]) is list:
             self.data = []
             for row in m:
+                if len(row) != len(m[0]):
+                    raise ValueError(f"rows in a matrix must be of same length")
+                
                 for el in row:
                     self.data.append(el)
             self.rows = len(m)
@@ -36,7 +43,7 @@ class Matrix:
             self.rows = 1
             self.cols = len(m)
         
-        self.EPS = EPS
+        self._abs_tol = abs_tol
 
 
     def __add__(self, other: Matrix) -> Matrix:
@@ -55,7 +62,7 @@ class Matrix:
 
     def __sub__(self, other) -> Matrix:
         if type(other) is not Matrix:
-            raise TypeError(f"can't add {type(self)} and {type(other)}")
+            raise TypeError(f"can't subtruct {type(self)} and {type(other)}")
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError(f"matricies must have same dimentions, "
                              f"but have sizes {self.get_size()} and {other.get_size()}")
@@ -105,14 +112,15 @@ class Matrix:
 
     def __eq__(self, other: Matrix) -> bool:
         if type(other) is not Matrix:
-            return False
+            raise TypeError(f"can only compare matrix to a matrix " +
+                            f"not {type(other)}")
         
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError(f"can only compare matrices with the same size"+
                              f"not {self.get_size()}, {other.get_size()}")
         
         for i in range(self.rows*self.cols):
-            if self.data[i] != other.data[i]:
+            if not isclose(self.data[i], other.data[i]):
                 return False
             
         return True
@@ -148,12 +156,16 @@ class Matrix:
 
         for i in range(n):
             # if diagonal element is 0 add other row to that row to make it non 0
-            if abs(u.data[i*n + i]) < self.EPS:
+            if isclose(u.data[i*n + i], 0, abs_tol=self._abs_tol):
+                FOUND_NON_ZERO_UNDER = False
                 for k in range(i + 1, n):
-                    if u.data[k*n + i]:
+                    if not isclose(u.data[k*n + i], 0, abs_tol=self._abs_tol):
+                        FOUND_NON_ZERO_UNDER = True
                         for j in range(n):
                             u.data[i*n + j] += u.data[k*n + j]
-                        return (l, u)
+                        break
+                if not FOUND_NON_ZERO_UNDER:
+                    return (l, u)
                       
             for k in range(i + 1, n):
                 # lower
@@ -168,11 +180,11 @@ class Matrix:
 
     def invert(self) -> Matrix | None:
         if self.rows != self.cols:
-            raise ValueError(f"can only invert square matrix"+
+            raise ValueError(f"can only invert square matrix "+
                              f"not {self.get_size()}")
 
-        if abs(self.determinant()) < self.EPS:
-            return None
+        if isclose(self.determinant(), 0, abs_tol=self._abs_tol):
+            raise ValueError("matrix is not invertable")
 
         n = self.rows
         inp = Matrix(n, n)
@@ -181,13 +193,12 @@ class Matrix:
 
         for i in range(n):
             # if diagonal element is 0 add other row to that row to make it non 0
-            if abs(inp.data[i*n + i]) < self.EPS:
-                for k in range(i + 1, n):
-                    if inp.data[k*n + i]:
+            if isclose(inp.data[i*n + i], 0, abs_tol=self._abs_tol):
+                for k in range(i + 1, n):   
+                    if not isclose(inp.data[k*n + i], 0, abs_tol=self._abs_tol):
                         for j in range(n):
                             inp.data[i*n + j], inp.data[k*n + j] = inp.data[k*n + j], inp.data[i*n + j]
                             out.data[i*n + j], out.data[k*n + j] = out.data[k*n + j], out.data[i*n + j]
-                        return None
 
             # normalise the diagonal element
             pivot = inp.data[i*n + i]
