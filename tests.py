@@ -18,6 +18,8 @@ class SimpleTests(TestCase):
             for i in range(m):
                 for j in range(n):
                     self.assertEqual(mat.get(i, j), 0)
+    
+    
     def test_initialization_by_list(self):
 
         mats = [[ [24, -22, 27, 6],
@@ -114,6 +116,9 @@ class SimpleTests(TestCase):
         
         with self.assertRaises(TypeError):
             Matrix([], "s")
+
+        with self.assertRaises(ValueError):
+            Matrix([[1,2], [3]])
 
 
     def test_addition(self):
@@ -459,50 +464,347 @@ class SimpleTests(TestCase):
       
 
     def test_division(self):
-        pass
+
+        tpls = [(
+                [ [19],
+                [-22],
+                [-7],
+                [-19] ],
+
+                6 ,
+
+                [ [3.1666666666666665],
+                [-3.6666666666666665],
+                [-1.1666666666666667],
+                [-3.1666666666666665] ],
+                ),
+
+                (
+                [ [-10],
+                [2],
+                [-5] ],
+
+                1 ,
+
+                [ [-10.0],
+                [2.0],
+                [-5.0] ],
+                ),
+
+                (
+                [ [4, -9],
+                [17, 10],
+                [-5, 10],
+                [-1, 20] ],
+
+                -1 ,
+
+                [ [-4.0, 9.0],
+                [-17.0, -10.0],
+                [5.0, -10.0],
+                [1.0, -20.0] ],
+                ),
+
+                (
+                [ [1, -9, -7, -13],
+                [-29, 23, 12, 1],
+                [14, -24, -2, 14] ],
+
+                -7 ,
+
+                [ [-0.14285714285714285, 1.2857142857142858, 1.0, 1.8571428571428572],
+                [4.142857142857143, -3.2857142857142856, -1.7142857142857142, -0.14285714285714285],
+                [-2.0, 3.4285714285714284, 0.2857142857142857, -2.0] ],
+                ),
+
+                (
+                [ [26, -23, 1, 9],
+                [-6, 4, -12, 11],
+                [7, 0, -18, -7],
+                [-1, 25, -24, -29] ],
+
+                -9 ,
+
+                [ [-2.888888888888889, 2.5555555555555554, -0.1111111111111111, -1.0],
+                [0.6666666666666666, -0.4444444444444444, 1.3333333333333333, -1.2222222222222223],
+                [-0.7777777777777778, -0.0, 2.0, 0.7777777777777778],
+                [0.1111111111111111, -2.7777777777777777, 2.6666666666666665, 3.2222222222222223] ],
+                ),
+                ]
+
+        for tpl in tpls:
+            mat1 = Matrix(tpl[0])
+            s = tpl[1]
+            matdiv = mat1 / s
+
+            for i in range(mat1.get_m()):
+                for j in range(mat1.get_n()):
+                    self.assertEqual(matdiv.get(i, j), tpl[2][i][j])
 
 
     def test_division_with_invalid_arguments(self):
-        pass
+
+        with self.assertRaises(TypeError):
+            mat1 = Matrix(2, 3)
+            mat2 = Matrix(2, 4)
+            mat1 / mat2
+
+        with self.assertRaises(TypeError):
+            mat1 = Matrix(2, 3)
+            mat2 = []
+            mat1 / mat2
+
+        with self.assertRaises(TypeError):
+            mat1 = Matrix(2, 3)
+            mat2 = "sss"
+            mat1 / mat2
+
+        with self.assertRaises(ZeroDivisionError):
+            mat1 = Matrix(1, 2)
+            mat1 / 0
     
 
     def test_equal(self):
-        pass
+
+        data = [[ [-17, 5, -12, -1, -17],
+                [-26, -18, 24, -24, 15],
+                [-26, 2, -30, -24, 4],
+                [-6, -17, 6, -23, -8] ],
+
+                [ [15, -6, -16],
+                [-30, -25, 22],
+                [-5, 25, -8],
+                [-5, 28, -10] ],
+
+                [ [-24, -4, 23, 15, -4],
+                [6, 19, 19, -1, -1],
+                [28, -28, 28, -22, -8] ],
+
+                [ [-29, -5, -20] ],
+
+                [ [26, 12] ],
+
+                [ [24, -1, 20, -12, -7],
+                [14, 14, -16, -6, -5],
+                [-12, -26, 21, 5, -15],
+                [22, 6, -1, -13, -24] ],
+                ]
+
+        for mat in data:
+            mat1 = Matrix(mat)
+            mat2 = Matrix(mat)
+
+            self.assertEqual(mat1, mat2)
 
 
     def test_equal_with_invalid_arguments(self):
-        pass
+
+        with self.assertRaises(ValueError):
+            mat1 = Matrix(2, 2)
+            mat2 = Matrix(1, 2)
+            mat1 == mat2
+
+        with self.assertRaises(TypeError):
+            mat1 = Matrix(2, 2)
+            mat2 = 0
+            mat1 == mat2
+            
+        with self.assertRaises(TypeError):
+            mat1 = Matrix(2, 2)
+            mat2 = []
+            mat1 == mat2
+
+        with self.assertRaises(TypeError):
+            mat1 = Matrix(2, 2)
+            mat2 = "jsd"
+            mat1 == mat2
 
 
     def test_determinant(self):
-        pass
+        tpls = [(
+                [ [1, 8, 28, -9, -12],
+                [8, -25, -30, -29, 14],
+                [25, 10, -26, 0, -28],
+                [27, -14, 7, 0, 10],
+                [-16, 12, -7, 0, -9] ],
+
+                2742683,
+                ),
+
+                (
+                [ [13, -2],
+                [-13, 22] ],
+
+                260 ,
+                ),
+
+                (
+                [ [2] ],
+
+                2 ,
+                ),
+
+                (
+                [ [-26, -22, 24, -13, 25],
+                [-25, 24, 19, 0, 5],
+                [-27, -29, -10, -17, 19],
+                [-1, 25, -27, 12, -21],
+                [13, 13, -18, -4, -21] ],
+
+                -3553595 ,
+                ),
+
+                (
+                [ [8] ],
+
+                8 ,
+                ),
+
+                (
+                [ [-25, -18],
+                [26, 6] ],
+
+                318 ,
+                ),
+
+                (
+                [ [-15, 8880, 1],
+                [100, 1, 0], 
+                [0, 0, 0]],
+
+                0 ,
+                ),
+
+                (
+                [ [0, 1],
+                [1, 0] ],
+
+                -1,
+                ),
+
+                (
+                [[0, 2, 0],
+                 [1, 0, 0],
+                 [0, 0, 3]],
+
+                 -6,
+                )
+                ]
+
+        for tpl in tpls:
+            mat = Matrix(tpl[0])
+            self.assertAlmostEqual(mat.determinant(), tpl[1])
 
 
     def test_determinant_with_invalid_arguments(self):
-        pass
+
+        with self.assertRaises(ValueError):
+            mat = Matrix(1, 2)
+            mat.determinant()
 
 
     def test_transpose(self):
-        pass
 
+        data = [[ [-15],
+                [-2],
+                [2] ],
 
-    def test_transpose_with_invalid_arguments(self):
-        pass
+                [ [9, 16, -2, -15],
+                [2, -8, 21, -13],
+                [18, -19, 21, 17] ],
+
+                [ [2, 5, 12, -17],
+                [8, -19, -25, -10],
+                [14, -30, 28, -4] ],
+
+                [ [-23, -30],
+                [2, -15],
+                [-7, 28],
+                [10, -18],
+                [19, -15] ],
+
+                [ [21, 3, -7] ],
+
+                [ [-3, 11, -10, 4],
+                [-10, -14, -22, 14],
+                [14, -24, 0, -26],
+                [-18, -19, 8, -11],
+                [-14, -18, -23, -26] ],
+
+                ]
+
+        for mat in data:
+            mat1 = Matrix(mat)
+            trmat = mat1.transpose()
+
+            for i in range(mat1.get_m()):
+                for j in range(mat1.get_n()):
+                    self.assertEqual(trmat.get(j, i), mat[i][j])
+       
 
     def test_invert(self):
-        pass
+
+        tpls = [(
+                [ [1] ],
+
+                [ [1] ]
+
+                ),
+
+                (
+                [[1,1,1,0],[1,1,1,1],[0,-1,1,2],[3,4,5,0]],
+
+                [[3.666666666666667,-0.666666666666667,0.333333333333333,-0.666666666666667],[-2.333333333333333,1.333333333333333,-0.666666666666667,0.333333333333333],[-0.333333333333333,-0.666666666666667,0.333333333333333,0.333333333333333],[-1,1,0,0]]
+
+                ),
+
+                (
+                [ [4, -1, 4],
+                [-3, 5, -1],
+                [0, 0, -4] ],
+
+                [[0.294117647058824,0.058823529411765,0.279411764705882],[0.176470588235294,0.235294117647059,0.117647058823529],[0,0,-0.25]]
+
+                ),
+
+                (
+                [ [4] ],
+
+                [ [0.25] ]
+
+                ),
+
+                (
+                [ [4, 3, -5],
+                [-3, -4, -5],
+                [-2, 0, 5] ],
+
+                [[-0.571428571428571,-0.428571428571429,-1],[0.714285714285714,0.285714285714286,1],[-0.228571428571429,-0.171428571428571,-0.2]]
+
+                ),
+
+                ]
+
+        for tpl in tpls:
+            mat = Matrix(tpl[0])
+            matinv = mat.invert()
+
+            for i in range(mat.get_m()):
+                for j in range(mat.get_n()):
+                    self.assertAlmostEqual(matinv.get(i, j), tpl[1][i][j])
 
 
     def test_invert_with_invalid_arguments(self):
-        pass   
+
+        with self.assertRaises(ValueError):
+            mat = Matrix(1, 2)
+            mat.invert()
 
 
-class BorderCaseTests(TestCase):
-    pass
-
-
-class PerformanceTests(TestCase):
-    pass
+        with self.assertRaises(ValueError):
+            mat = Matrix([[1, 2],
+                          [1, 2]])   
+            mat.invert()
 
 
 if __name__ == "__main__":
