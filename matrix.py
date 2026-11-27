@@ -1,5 +1,5 @@
-from math import isclose
 from __future__ import annotations
+from math import isclose
 
 
 class Matrix:
